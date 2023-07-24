@@ -1,0 +1,22 @@
+{
+  "name": "stats",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "nodemon ./bin/www"
+  },
+  "dependencies": {
+    "cookie-parser": "~1.4.4",
+    "date-fns": "^2.30.0",
+    "debug": "~2.6.9",
+    "express": "~4.16.1",
+    "firebase": "^9.22.0",
+    "firebase-admin": "^11.8.0",
+    "http-errors": "~1.6.3",
+    "moment": "^2.29.4",
+    "moment-timezone": "^0.5.43",
+    "morgan": "~1.9.1",
+    "pug": "2.0.0-beta11",
+    "webix": "^10.0.1"
+  }
+}

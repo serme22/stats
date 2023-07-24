@@ -1,0 +1,32 @@
+data: [
+    {
+        "insert": 1223213,
+        "battery": {
+            "low": 0,
+            "percent": 0,
+            "residual": 0,
+            "count": 0,
+            "capacity": 0
+        }
+    },
+    {
+        "insert": 1223213,
+        "battery": {
+            "low": 0,
+            "percent": 0,
+            "residual": 0,
+            "count": 0,
+            "capacity": 0
+        }
+    },
+    {
+        "insert": 1223213,
+        "battery": {
+            "low": 0,
+            "percent": 0,
+            "residual": 0,
+            "count": 0,
+            "capacity": 0
+        }
+    }
+]

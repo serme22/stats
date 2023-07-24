@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Highcharts Forecast Example</title>
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script src="https://code.highcharts.com/modules/series-label.js"></script>
+  <script src="https://code.highcharts.com/modules/exporting.js"></script>
+  <script src="https://code.highcharts.com/modules/export-data.js"></script>
+</head>
+<body>
+  <div id="container"></div>
+
+  <script>
+    // Data for the chart
+    var data = [
+      [Date.UTC(2023, 0, 1), 50],
+      [Date.UTC(2023, 1, 1), 60],
+      [Date.UTC(2023, 2, 1), 70],
+      [Date.UTC(2023, 3, 1), 80],
+      [Date.UTC(2023, 4, 1), 90],
+      [Date.UTC(2023, 5, 1), null],
+      [Date.UTC(2023, 6, 1), null],
+      [Date.UTC(2023, 7, 1), null],
+      [Date.UTC(2023, 8, 1), null],
+      [Date.UTC(2023, 9, 1), null],
+      [Date.UTC(2023, 10, 1), null],
+      [Date.UTC(2023, 11, 1), null]
+    ];
+
+    // Create the chart
+    Highcharts.chart('container', {
+      title: {
+        text: 'Sales Forecast'
+      },
+      xAxis: {
+        type: 'datetime',
+        dateTimeLabelFormats: {
+          month: '%b %Y'
+        },
+        title: {
+          text: 'Date'
+        }
+      },
+      yAxis: {
+        title: {
+          text: 'Sales'
+        }
+      },
+      plotOptions: {
+        series: {
+          label: {
+            connectorAllowed: false
+          },
+          marker: {
+            enabled: true
+          }
+        }
+      },
+      series: [{
+        name: 'Sales',
+        data: data,
+        zIndex: 1,
+        marker: {
+          fillColor: 'white',
+          lineWidth: 2,
+          lineColor: Highcharts.getOptions().colors[0]
+        }
+      }, {
+        type: 'line',
+        name: 'Forecast',
+        data: [[Date.UTC(2023, 5, 1), 90], [Date.UTC(2023, 11, 1), 110]],
+        zIndex: 0,
+        color: '#FF0000',
+        marker: {
+          fillColor: 'white',
+          lineWidth: 2,
+          lineColor: '#FF0000'
+        },
+        enableMouseTracking: false
+      }],
+      tooltip: {
+        shared: true,
+        crosshairs: true,
+        dateTimeLabelFormats: {
+          month: '%b %Y'
+        }
+      },
+      legend: {
+        enabled: true
+      },
+      credits: {
+        enabled: false
+      }
+    });
+  </script>
+</body>
+</html>

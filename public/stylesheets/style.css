@@ -1,0 +1,42 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+
+.myhover {
+  background: #009EE3;
+}
+
+.highcharts-title {
+  fill: #434348;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+/*stato 100*/
+.stato_100 {
+  background-color: #FFAAAA;
+  
+  /*;*/
+}
+
+/*stato 900*/
+.stato_900 {
+  background-color: #aaffaa;
+}
+
+.stato_200 {
+  background-color: #feffaa;
+}
+
+.stato_300 {
+  background-color: #e68342;
+}
+
+.stato-900{
+  background-color: #888888;
+}
+
