@@ -27,5 +27,8 @@ router.get('/dpa', function(req, res, next){
   res.redirect('/dpa.html');
 });
 
+router.get('/distintabase', function(req, res, next){
+  res.redirect('/distintabase.html');
+});
 
 module.exports = router;

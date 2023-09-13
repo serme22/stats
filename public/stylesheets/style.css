@@ -40,3 +40,19 @@ a {
   background-color: #888888;
 }
 
+.node-desc {
+  font-style: italic;
+  color: gray;
+}
+
+.node-articolo {
+  font-style: bold;
+  color: blue;
+
+}
+
+.menu-content-title {
+
+  font-weight: bold;
+
+}

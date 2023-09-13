@@ -151,7 +151,7 @@ const form_edit = {
                 { view: "text", value: "100", name: "stato", hidden: true },
                 { view: "combo", label: "Tipo", labelWidth: "120", options: [{ id: "ITA", value: "Italia" }, { id: "EST", value: "Estero" }], required: true, name: "tipo" },
                 { view: "datepicker", name: "data_richiesta", label: "Data richiesta:", labelWidth: "120", format: "%d/%m/%Y", required: true },
-                { view: "textarea", name: "cliente", label: "Cliente:", required: true, labelWidth: "120", height: 100, suggest: "http://127.0.0.1:8000/api/v1/cliente/" },
+                { view: "textarea", name: "cliente", label: "Cliente:", required: true, labelWidth: "120", height: 100, suggest: "http://127.0.0.1:8000/api/v1/anagrafica/" },
                 toolbar_edit,
                 table_rows,
                 {
@@ -205,7 +205,14 @@ const menu_file = {
             id: "D", value: "DPA", submenu: [{ id: "S", value: "Salva" },
             { id: "A", value: "Azioni", submenu: [{ id: "R", value: "Richiesta preparazione" }, { id: "P", value: "Preparato" }, { id: "E", value: "Evadi", disabled: true }, { id: "A", value: "Annulla" }] }]
         }
-    ]
+    ],
+    on:{
+        onMenuItemClick:function(id){
+
+            console.log(this.getMenuItem(id))
+            webix.message("Click: "+this.getMenuItem(id).value);
+        }
+    }
 
 }
 

@@ -4,6 +4,153 @@ dayjs.extend(window.dayjs_plugin_relativeTime)
 
 var session
 
+async function get_privileges(server, token, user) {
+
+    var myHeaders = new Headers();
+
+    myHeaders.append("Content-Type", "application/json");
+    myHeaders.append("Origin", server);
+    myHeaders.append("Authorization", `token ${token}`);
+
+    var requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+        redirect: 'follow'
+    };
+
+    //inviti associati alle periferiche
+    let basic = await fetch(`${server}/privileges?user_id=${user}&export_peripheral=0&export_peripheral_group_peripherals=0&export_peripheral_groups=0&page_size=8000`, requestOptions)
+        .then(response => response.json())
+        .then(result => {
+
+            var list = result.list
+            var data = list.map((val) => {
+                return {
+                    name: val.id,
+                    group: val.group_tag
+                }
+            })
+
+            console.log(data)
+            var group = d3.rollup(data, d => d.length, d => d.group)
+
+            var series =
+            {
+                id: "type",
+                name: "Type",
+                colorByPoint: true,
+                data: []
+            }
+
+            var seriesdata = []
+
+            group.forEach((value, key) => {
+                seriesdata.push({
+                    name: key,
+                    y: value,
+                    sliced: true
+                })
+            })
+
+            series.data = seriesdata
+
+            return series
+
+        })
+        .catch(error => console.log('error', error));
+
+
+    let guest = await fetch(`${server}/privileges/sent/?user_id=${user}&export_peripheral=0&export_peripheral_group_peripherals=0&export_peripheral_groups=0&page_size=8000`, requestOptions)
+        .then(response => response.json())
+        .then(result => {
+
+            var list = result.list
+            var data = list.map((val) => {
+                return {
+                    name: val.id,
+                    group: val.group_tag
+                }
+            })
+
+            var group = d3.rollup(data, d => d.length, d => d.group)
+            var seriesdata = []
+            /*
+                        group.forEach((value, key) => {
+                            seriesdata.push({
+                                name: key +" - invitati",
+                                y: value,
+                                sliced: true
+                            })
+                        })
+            */
+            return group
+
+        })
+        .catch(error => console.log('error', error));
+
+
+    let deleted = await fetch(`${server}/privileges/deleted/?user_id=${user}&page_size=8000`, requestOptions)
+        .then(response => response.json())
+        .then(result => {
+
+            var list = result.list
+            var data = list.map((val) => {
+                return {
+                    name: val.id,
+                    group: val.group_tag
+                }
+            })
+
+            var group = d3.rollup(data, d => d.length, d => d.group)
+
+            return group
+
+        })
+        .catch(error => console.log('error', error));
+
+    let chart_basic = $$("chart_type").getChart();
+
+    let chart_seded = $$("chart_sended").getChart();
+
+
+    while (chart_basic.series.length) {
+        chart_basic.series[0].remove();
+    };
+
+    while (chart_seded.series.length) {
+        chart_seded.series[0].remove();
+    };
+
+    var inviati =
+    {
+        id: "inviati",
+        name: "inviati",
+        colorByPoint: true,
+        data: []
+    }
+
+    guest.forEach((value, key) => {
+        inviati.data.push({
+            name: key + " - invitati",
+            y: value,
+            sliced: false
+        })
+    })
+
+    deleted.forEach((value, key) => {
+        inviati.data.push({
+            name: key + " - deleted",
+            y: value,
+            sliced: false
+        })
+    })
+
+    chart_basic.addSeries(basic)
+    chart_seded.addSeries(inviati)
+
+
+}
+
 async function get_sended_invites(server, token, user) {
 
     var myHeaders = new Headers();
@@ -34,6 +181,8 @@ const button_logout =
     view: "button",
     label: "esci",
     align: "right",
+    type: "icon",
+    icon: "wxi-angle-double-right",
     width: 100,
     click: function () {
         webix.storage.session.clear()
@@ -70,6 +219,7 @@ const table_send_keys = {
     id: "tbl_send_keys",
     view: "datatable",
     resizeColumn: true,
+    select: "cell",
     columns: [
         { id: "id", header: ["id"], adjust: true },
         { id: "btcode", header: ["btcode", { content: "textFilter" }], adjust: true },
@@ -80,7 +230,7 @@ const table_send_keys = {
         },
         { id: "user_name", header: ["name"] },
         { id: "user_surname", header: ["surname"] },
-        { id: "user_email", header: ["email"], adjust: true },
+        { id: "user_email", header: ["email", { content: "textFilter" }], adjust: true },
         {
             id: "last_usage_time", header: ["ultimo utilizzo"], format: function (val) {
                 return format_date(val)
@@ -95,6 +245,15 @@ const table_send_keys = {
         },
         onAfterFilter: function () {
             $$("label_invitations").parse({ count: this.count() })
+        },
+        onAfterSelect: function (selection, preserve) {
+            var item = this.getItem(selection.row)
+            console.log(item.btcode)
+
+            const tbl = $$("tbl_periferiche")
+            tbl.getFilter("btcode").value = item.btcode
+            tbl.filterByAll()
+
         },
     }
 }
@@ -122,6 +281,8 @@ const table_logs = {
                         return "Apertura"
                     case 17:
                         return "Chiusura"
+                    case 18:
+                        return "Tag"
                     case 21:
                         return "Scansionato QR"
                 }
@@ -260,6 +421,18 @@ function clearAll() {
 
 }
 
+const button_dw_users = {
+
+    view: "button",
+    label: "scarica",
+    click: function () {
+        webix.toExcel($$("tbl_send_keys"), {
+            filename:"Invitati"
+        })
+    }
+
+}
+
 const button_cerca = {
 
     id: "btn_cerca",
@@ -330,6 +503,9 @@ const button_cerca = {
                 get_sended_invites(session.server, session.token, params.cliente).then((result) => {
                     $$("tbl_send_keys").parse(result)
                 })
+
+                get_privileges(session.server, session.token, params.cliente)
+
             }
             )
 
@@ -413,6 +589,36 @@ const chart_percentual = {
     }
 }
 
+const chart_type = {
+
+    id: "chart_type",
+    view: "highchart",
+    modules: ["series-label", "exporting", "export-data"],
+    cdn: "https://code.highcharts.com/11.0.1",
+    settings: {
+        chart: { type: 'pie' },
+        title: { text: 'Basic keys' },
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b><br>N°: <b>{point.y}</b>'
+        }
+    }
+}
+
+const chart_sended = {
+
+    id: "chart_sended",
+    view: "highchart",
+    modules: ["series-label", "exporting", "export-data"],
+    cdn: "https://code.highcharts.com/11.0.1",
+    settings: {
+        chart: { type: 'pie' },
+        title: { text: 'Send keys' },
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b><br>N°: <b>{point.y}</b>'
+        }
+    }
+}
+
 const chart_fw = {
 
     id: "chart_fw",
@@ -432,8 +638,6 @@ const chart_fw = {
                     events: {
                         click: function () {
                             const tbl = $$("tbl_periferiche")
-
-
                             tbl.getFilter("fw").value = this.name
                             tbl.filterByAll()
                             //tbl.filter ("fw", this.name)
@@ -443,26 +647,6 @@ const chart_fw = {
                 }
             }
         }
-
-
-        /*
-        plotOptions: {
-            pie: {
-                allowPointSelect: true,
-                cursor: 'pointer',
-                dataLabels: {
-                    enabled: true,
-                    format: '<b>{point.name}</b>: {point.percentage:.1f} % <br>'
-                },
-                series: {
-                    events: {
-                        click: function (){
-                            console.log(this)
-                        }
-                    }
-                }
-            },
-        }*/
     }
 }
 
@@ -482,7 +666,7 @@ const table_periferiche = {
     view: "datatable",
     resizeColumn: true,
     hover: "myhover",
-    select:"row",
+    select: "row",
     gravity: 3,
     tooltip: true,
     scheme: {
@@ -516,7 +700,7 @@ const table_periferiche = {
 
             }
         },
-        { id: "name", header: ["name", { content: "textFilter" }], adjust: true },
+        { id: "name", header: ["name", { content: "textFilter" }], adjust: true, sort: "text" },
         { id: "desc", header: ["desc"], adjust: true },
         { id: "address", header: ["indirizzo"] },
         { id: "tipo", header: ["tipo", { content: "selectFilter" }], adjust: true, map: "#peripheral_type.name#", sort: "text" },
@@ -923,27 +1107,33 @@ webix.ready(() => {
         rows: [
             toolbar,
             { header: "Rircerca cliente", body: form_cerca },
+            { view: "resizer" },
             {
                 header: "Periferiche", body: {
-                    cols: [{ rows: [label_counter, table_periferiche, pager_peripherals, button_download] },
-                    { view: "resizer" },
+                    cols: [
+                        { gravity: 4, rows: [label_counter, table_periferiche, pager_peripherals, button_download] },
+                        { view: "resizer" },
                         chart_fw]
                 }
             },
+            { view: "resizer" },
             {
                 header: "Utenti",
                 collapsed: true,
                 body: { cols: [table_users, { view: "resizer" }, table_logs] }
             },
+            { view: "resizer" },
             {
                 header: "Invitati",
                 collapsed: true,
                 body:
                 {
                     rows: [label_invitations,
-                        table_send_keys]
+                        table_send_keys,
+                        button_dw_users]
                 }
             },
+            { view: "resizer" },
             {
                 header: "Grafici",
                 collapsed: true,
@@ -954,6 +1144,15 @@ webix.ready(() => {
                         { view: "resizer" },
                         chart_percentual
                     ]
+                }
+            },
+            { view: "resizer" },
+            {
+
+                header: "Dashboard",
+                collapsed: true,
+                body: {
+                    cols: [chart_type, chart_sended]
                 }
             }
         ]
